@@ -8,6 +8,7 @@ using TriggeredSendWithTracking.BusinessObjects;
 using TriggeredSendWithTracking.Clients;
 using TriggeredSendWithTracking.Contracts;
 using TriggeredSendWithTracking.ETService;
+using TriggeredSendWithTracking.Factory;
 using TriggeredSendWithTracking.Utlities;
 
 namespace TriggeredSendWithTracking
@@ -19,11 +20,16 @@ namespace TriggeredSendWithTracking
         public static ITriggeredSendDefinitionClient triggeredSendDefinitionClient { get; set; }
         public static IDataExtensionClient _dataExtensionClient { get; set; }
         public static IDeliveryProfileClient _deliveryProfileClient { get; set; }
+        public static IExactTargetConfiguration config { get; set; }
+        public static SoapClient _Client { get; set; }
         #endregion
 
         #region"Main                        "
         static void Main(string[] args)
         {
+            config = GetConfig();
+            GetClient(config);
+
             TriggeredSendDataModel Mdl = new TriggeredSendDataModel()
             {
                 DataExtensionExternalKey = "RIBEventTest",
@@ -65,8 +71,7 @@ namespace TriggeredSendWithTracking
 
         private static void SendUsingPreDefinedKeys(TriggeredSendDataModel TriggerData, List<SubscriberDataModel> Subscriberlist)
         {
-            var config = GetConfig();
-            GetClient(config);
+
 
             if (!CheckIsExists(TriggerData))
             {
@@ -195,6 +200,7 @@ namespace TriggeredSendWithTracking
             triggeredSendDefinitionClient = new TriggeredSendDefinitionClient(config);
             _dataExtensionClient = new DataExtensionClient(config);
             _deliveryProfileClient = new DeliveryProfileClient(config);
+            _Client = SoapClientFactory.Manufacture(config);
         }
         #endregion
 
@@ -210,6 +216,75 @@ namespace TriggeredSendWithTracking
                 EndPoint = "https://webservice.s6.exacttarget.com/Service.asmx",//  Proper End Point Required From SMS
                 ClientId = 6191809
             };
+        }
+        #endregion
+
+        #region"BounceEventDetails          "
+        public void BounceEventDetails(DateTime fromDate, DateTime toDate, string TriggeredSendDefinitionObjectID)
+        {
+            List<string> BounceSubscribers;
+            RetrieveRequest retrieveRequest = new RetrieveRequest();
+            retrieveRequest.ObjectType = "BounceEvent";
+
+            String[] props = {
+                                  "SubscriberKey", "BounceType", "SMTPCode", "SMTPReason", "BounceCategory", "EventDate", "EventType"
+                                 };
+
+            retrieveRequest.Properties = props;
+
+            SimpleFilterPart filter = new SimpleFilterPart();
+            //Use this only if you are retrieving for TriggeredSend
+
+            filter.Property = "TriggeredSendDefinitionObjectID";
+            String[] vlaues = { TriggeredSendDefinitionObjectID };
+
+            //filter.Property = "SendID";
+            //String[] vlaues = { "28980" };
+            filter.Value = vlaues;
+
+            SimpleFilterPart dateFilter = new SimpleFilterPart();
+            dateFilter.Property = "EventDate";
+            dateFilter.SimpleOperator = SimpleOperators.between;
+            dateFilter.DateValue = new DateTime[2];
+            dateFilter.DateValue[0] = fromDate.Date; //BeingDate;
+            dateFilter.DateValue[1] = toDate.Date; //EndDate;
+
+
+            ComplexFilterPart cfilter = new ComplexFilterPart();
+            cfilter.LeftOperand = filter;
+            cfilter.LogicalOperator = LogicalOperators.AND;
+            cfilter.RightOperand = dateFilter;
+
+
+            retrieveRequest.Filter = cfilter;
+            /**
+            * Use this only if you are retrieving data from sub-account
+            */
+
+            retrieveRequest.ClientIDs = new ClientID[] { new ClientID() { ID = config.ClientId.Value, IDSpecified = true } };
+
+            APIObject[] results = null;
+            String requestId = null;
+            String response = _Client.Retrieve(retrieveRequest, out requestId, out results);
+            BounceEvent bounceEvent = null;
+            if (response != null && response.ToLower().Equals("ok"))
+            {
+                if (results != null && results.Count() > 0)
+                {
+                    BounceSubscribers = results.Cast<BounceEvent>().Select(a => a.SubscriberKey).ToList();
+                    Console.WriteLine("*******************************************************");
+                    Console.WriteLine("*******************************************************");
+                    Console.WriteLine("************* List of Bounce Subscribers **************");
+                    Console.WriteLine("*******************************************************");
+                    Console.WriteLine("*******************************************************");
+
+                    foreach (var sub in BounceSubscribers)
+                    {
+                        Console.WriteLine(string.Format("Subscriber Key: {0}", sub));
+                    }
+                }
+            }
+
         }
         #endregion
     }
