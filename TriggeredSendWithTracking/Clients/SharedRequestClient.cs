@@ -114,25 +114,44 @@ namespace TriggeredSendWithTracking.Clients
             return default(T);
         }
 
-        public IList<TrackingEvent> RetrieveTrackingEventData(Type eventType, DateTime sinceWhen, String eventTypeString, ClientID clientId = null)
+        public IList<TrackingEvent> RetrieveTrackingEventData(Type eventType, DateTime sinceWhen, String eventTypeString, ClientID clientId = null, string TriggeredSendDefinitionObjectID = "")
         {
 
             //String filterField = "CreatedDate";
             String filterField = "EventDate";
             var properties = GetRetrivableProperties(eventTypeString).ToArray();
 
+
+            SimpleFilterPart filter = new SimpleFilterPart();
+            //Use this only if you are retrieving for TriggeredSend
+            filter.Property = "TriggeredSendDefinitionObjectID";
+            String[] vlaues = { TriggeredSendDefinitionObjectID };
+
+
+            //filter.Property = "SendID";
+            //String[] vlaues = { "28980" };
+            filter.Value = vlaues;
+
+            var dateFilter = new SimpleFilterPart
+            {
+                Property = filterField,
+                SimpleOperator = SimpleOperators.greaterThanOrEqual,
+                DateValue = new DateTime[] {
+                        sinceWhen
+                    }
+            };
+
+            ComplexFilterPart cfilter = new ComplexFilterPart();
+            cfilter.LeftOperand = filter;
+            cfilter.LogicalOperator = LogicalOperators.AND;
+            cfilter.RightOperand = dateFilter;
+
+
             RetrieveRequest retrieveRequest = new RetrieveRequest
             {
                 ObjectType = eventType.Name,
                 Properties = properties,
-                Filter = new SimpleFilterPart
-                {
-                    Property = filterField,
-                    SimpleOperator = SimpleOperators.greaterThanOrEqual,
-                    DateValue = new DateTime[] {
-                        sinceWhen
-                    }
-                },
+                Filter = cfilter,
                 ClientIDs = new ClientID[] { clientId }
             };
 
