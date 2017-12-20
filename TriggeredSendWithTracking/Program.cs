@@ -23,6 +23,7 @@ namespace TriggeredSendWithTracking
         public static IDeliveryProfileClient _deliveryProfileClient { get; set; }
         public static IExactTargetConfiguration config { get; set; }
         public static SoapClient _Client { get; set; }
+        
         #endregion
 
         #region"Main                        "
