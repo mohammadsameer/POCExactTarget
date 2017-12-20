@@ -13,6 +13,6 @@ namespace TriggeredSendWithTracking.Contracts
         string RetrieveObjectId(string propertyName, string value, string objectType);
         T RetrieveObject<T>(string propertyName, string value, string objectType);
         IList<string> GetRetrivableProperties(string type);
-        IList<TrackingEvent> RetrieveTrackingEventData(Type eventType, DateTime sinceWhen, String eventTypeString, ClientID clientId = null);
+        IList<TrackingEvent> RetrieveTrackingEventData(Type eventType, DateTime sinceWhen, String eventTypeString, ClientID clientId = null, string TriggeredSendDefinitionObjectID = "");
     }
 }

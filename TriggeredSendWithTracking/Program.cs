@@ -23,6 +23,7 @@ namespace TriggeredSendWithTracking
         public static IDeliveryProfileClient _deliveryProfileClient { get; set; }
         public static IExactTargetConfiguration config { get; set; }
         public static SoapClient _Client { get; set; }
+        
         #endregion
 
         #region"Main                        "
@@ -67,6 +68,8 @@ namespace TriggeredSendWithTracking
             SendUsingPreDefinedKeys(Mdl, Subscriberlist);
             Console.WriteLine("Done");
             Console.ReadKey();
+
+            TrackingEventData(Utlities.TrackingEvent.BounceEvent, Convert.ToDateTime("12/19/2017"), "");
         }
 
         private static void SendUsingPreDefinedKeys(TriggeredSendDataModel TriggerData, List<SubscriberDataModel> Subscriberlist)
@@ -288,23 +291,24 @@ namespace TriggeredSendWithTracking
         }
         #endregion
 
-
-        string[] RetrieveTrackingEvents(Utlities.TrackingEvent eventType, DateTime sinceWhen)
+        public static void TrackingEventData(Utlities.TrackingEvent eventType, DateTime sinceWhen, string TriggerSendObjectID)
         {
-            return RetrieveTrackingEvents(eventType.ToString(), sinceWhen).ToArray();
-        }
-        public void TrackingEventData(Utlities.TrackingEvent eventType, DateTime sinceWhen)
-        {
-            string[] trackingData = RetrieveTrackingEvents(eventType, sinceWhen);
+            string[] trackingData = RetrieveTrackingEvents(eventType, sinceWhen, TriggerSendObjectID);
             var FilePath = string.Format(@"C:\{0}\{1}_{2}_EventData.csv", eventType.ToString(), eventType.ToString(), DateTime.Now.Ticks);
             File.WriteAllLines(FilePath, trackingData);
         }
-        public IList<string> RetrieveTrackingEvents(string eventType, DateTime sinceWhen)
+
+        public static string[] RetrieveTrackingEvents(Utlities.TrackingEvent eventType, DateTime sinceWhen, string TriggerSendObjectID)
+        {
+            return RetrieveTrackingEvents(eventType.ToString(), sinceWhen, TriggerSendObjectID).ToArray();
+        }
+
+        public static IList<string> RetrieveTrackingEvents(string eventType, DateTime sinceWhen, string TriggerSendObjectID)
         {
             Type apiObjectType = typeof(ETService.APIObject);
             Type et = Type.GetType(apiObjectType.Namespace + "." + eventType);
 
-            IList<ETService.TrackingEvent> trackingData = _SharedClent.RetrieveTrackingEventData(et, sinceWhen, eventType);
+            IList<ETService.TrackingEvent> trackingData = _SharedClent.RetrieveTrackingEventData(et, sinceWhen, eventType, null, TriggerSendObjectID);
             return ETService.APIObject.ToTickDelimited(trackingData);
         }
 
