@@ -36,7 +36,7 @@ namespace TriggeredSendWithTracking
                 DataExtensionExternalKey = "RIBEventTest",
                 FromEmail = "sameer.mohammad@pimco.com",
                 FromName = "Master Tester",
-                EmailExternalKey = "MiFID",              // email name, id, customer key.
+                EmailExternalKey = "RIB_Events",              // email name, id, customer key.
                                                          // EmailTemplateExternalKey = "RIB_Events",  //template name ,val
                 TriggerSendDefinitionExternalKey = "RIB_EventsNew",
                 // CcEmails = "Steven.Jackson@pimco.com",
@@ -155,6 +155,7 @@ namespace TriggeredSendWithTracking
                 //  var isEmailTemplateExternalKey = _SharedClent.DoesObjectExist("CustomerKey", TriggerData.EmailTemplateExternalKey, "Template");
                 var isDataExtension = _SharedClent.DoesObjectExist("CustomerKey", TriggerData.DataExtensionExternalKey, "DataExtension");
                 var isTriggeredSendDefinition = _SharedClent.DoesObjectExist("CustomerKey", TriggerData.TriggerSendDefinitionExternalKey, "TriggeredSendDefinition");
+                var isTriggeredSendDefiniObjIDtion = _SharedClent.RetrieveObjectId("CustomerKey", TriggerData.TriggerSendDefinitionExternalKey, "TriggeredSendDefinition");
                 var isEmail = _SharedClent.DoesObjectExist("Name", TriggerData.EmailExternalKey, "Email");
                 string EmailID;
                 int ID = 0;
