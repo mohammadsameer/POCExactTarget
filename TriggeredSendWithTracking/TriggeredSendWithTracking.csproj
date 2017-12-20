@@ -45,13 +45,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusinessObjects\Constants.cs" />
     <Compile Include="BusinessObjects\SubscriberDataModel.cs" />
     <Compile Include="BusinessObjects\TriggeredSendDataModel.cs" />
+    <Compile Include="Clients\APIObject.cs" />
     <Compile Include="Clients\DataExtensionClient.cs" />
     <Compile Include="Clients\DeliveryProfileClient.cs" />
     <Compile Include="Clients\EmailTrigger.cs" />
     <Compile Include="Clients\ExactTargetConfiguration.cs" />
     <Compile Include="Clients\SharedRequestClient.cs" />
+    <Compile Include="Clients\SoapClient.cs" />
     <Compile Include="Clients\TriggeredSendDefinitionClient.cs" />
     <Compile Include="Contracts\IDataExtensionClient.cs" />
     <Compile Include="Contracts\IDeliveryProfileClient.cs" />

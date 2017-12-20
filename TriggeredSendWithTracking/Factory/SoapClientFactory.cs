@@ -18,5 +18,6 @@ namespace TriggeredSendWithTracking.Factory
             client.ClientCredentials.UserName.Password = config.ApiPassword;
             return client;
         }
+
     }
 }

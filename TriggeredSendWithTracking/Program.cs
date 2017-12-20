@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,8 +36,8 @@ namespace TriggeredSendWithTracking
                 DataExtensionExternalKey = "RIBEventTest",
                 FromEmail = "sameer.mohammad@pimco.com",
                 FromName = "Master Tester",
-                EmailExternalKey = "RIB_Events",              // email name, id, customer key.
-                                                              // EmailTemplateExternalKey = "RIB_Events",  //template name ,val
+                EmailExternalKey = "MiFID",              // email name, id, customer key.
+                                                         // EmailTemplateExternalKey = "RIB_Events",  //template name ,val
                 TriggerSendDefinitionExternalKey = "RIB_EventsNew",
                 // CcEmails = "Steven.Jackson@pimco.com",
 
@@ -64,7 +65,6 @@ namespace TriggeredSendWithTracking
 
 
             SendUsingPreDefinedKeys(Mdl, Subscriberlist);
-
             Console.WriteLine("Done");
             Console.ReadKey();
         }
@@ -277,7 +277,6 @@ namespace TriggeredSendWithTracking
                     Console.WriteLine("************* List of Bounce Subscribers **************");
                     Console.WriteLine("*******************************************************");
                     Console.WriteLine("*******************************************************");
-
                     foreach (var sub in BounceSubscribers)
                     {
                         Console.WriteLine(string.Format("Subscriber Key: {0}", sub));
@@ -287,5 +286,26 @@ namespace TriggeredSendWithTracking
 
         }
         #endregion
+
+
+        string[] RetrieveTrackingEvents(Utlities.TrackingEvent eventType, DateTime sinceWhen)
+        {
+            return RetrieveTrackingEvents(eventType.ToString(), sinceWhen).ToArray();
+        }
+        public void TrackingEventData(Utlities.TrackingEvent eventType, DateTime sinceWhen)
+        {
+            string[] trackingData = RetrieveTrackingEvents(eventType, sinceWhen);
+            var FilePath = string.Format(@"C:\{0}\{1}_{2}_EventData.csv", eventType.ToString(), eventType.ToString(), DateTime.Now.Ticks);
+            File.WriteAllLines(FilePath, trackingData);
+        }
+        public IList<string> RetrieveTrackingEvents(string eventType, DateTime sinceWhen)
+        {
+            Type apiObjectType = typeof(ETService.APIObject);
+            Type et = Type.GetType(apiObjectType.Namespace + "." + eventType);
+
+            IList<ETService.TrackingEvent> trackingData = _SharedClent.RetrieveTrackingEventData(et, sinceWhen, eventType);
+            return ETService.APIObject.ToTickDelimited(trackingData);
+        }
+
     }
 }
