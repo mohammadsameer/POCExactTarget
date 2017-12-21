@@ -22,7 +22,9 @@ namespace TriggeredSendWithTracking.Clients
 
         public bool DoesObjectExist(string propertyName, string value, string objectType)
         {
-            var properties = GetRetrivableProperties(objectType);
+            var propierties = GetRetrivableProperties(objectType).ToArray();
+            if (objectType == "DataExtension")
+                propierties = new string[] { "ObjectID", "CustomerKey", "Name" };
 
             var request = new RetrieveRequest
             {
@@ -30,7 +32,7 @@ namespace TriggeredSendWithTracking.Clients
                     ? new[] { new ClientID { ID = _config.ClientId.Value, IDSpecified = true } }
                     : null,
                 ObjectType = objectType,
-                Properties = properties.ToArray(),
+                Properties = propierties,
 
                 Filter = new SimpleFilterPart
                 {

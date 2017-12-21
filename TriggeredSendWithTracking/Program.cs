@@ -23,7 +23,7 @@ namespace TriggeredSendWithTracking
         public static IDeliveryProfileClient _deliveryProfileClient { get; set; }
         public static IExactTargetConfiguration config { get; set; }
         public static SoapClient _Client { get; set; }
-        
+
         #endregion
 
         #region"Main                        "
@@ -38,9 +38,9 @@ namespace TriggeredSendWithTracking
                 FromEmail = "sameer.mohammad@pimco.com",
                 FromName = "Master Tester",
                 EmailExternalKey = "RIB_Events",              // email name, id, customer key.
-                                                         // EmailTemplateExternalKey = "RIB_Events",  //template name ,val
+                                                              // EmailTemplateExternalKey = "RIB_Events",  //template name ,val
                 TriggerSendDefinitionExternalKey = "RIB_EventsNew",
-                // CcEmails = "Steven.Jackson@pimco.com",
+                                                              // CcEmails = "Steven.Jackson@pimco.com",
 
                 isCcNeed = true,
                 isBccNeed = true
@@ -58,8 +58,8 @@ namespace TriggeredSendWithTracking
             rep.Add(new KeyValuePair<string, string>("view_email_url", "Test"));
             rep.Add(new KeyValuePair<string, string>("insert date", "Test"));
             rep.Add(new KeyValuePair<string, string>("manage_url", "Test"));
-            rep.Add(new KeyValuePair<string, string>("CCAddress", "sam232b@gmail.com"));
-            rep.Add(new KeyValuePair<string, string>("BCCAddress", "kkmir09@gmail.com"));
+            rep.Add(new KeyValuePair<string, string>("CCAddress", "sam232b@gmail.com;kkmir09@gmail.com"));
+           // rep.Add(new KeyValuePair<string, string>("BCCAddress", "kkmir09@gmail.com"));
 
 
             Subscriberlist.Add(new SubscriberDataModel() { SubscriberEmail = "sameer.mohammad@pimco.com", SubscriberKey = "sameer.mohammad@pimco.com", ReplacementValues = rep });
@@ -69,7 +69,8 @@ namespace TriggeredSendWithTracking
             Console.WriteLine("Done");
             Console.ReadKey();
 
-            TrackingEventData(Utlities.TrackingEvent.BounceEvent, Convert.ToDateTime("12/19/2017"), "");
+            TrackingEventData(Utlities.TrackingEvent.BounceEvent, Convert.ToDateTime("12/19/2017"), "2989c88b-2ae0-e711-b454-00110a67f325");
+            TrackingEventData(Utlities.TrackingEvent.SentEvent, Convert.ToDateTime("12/19/2017"), "2989c88b-2ae0-e711-b454-00110a67f325");
         }
 
         private static void SendUsingPreDefinedKeys(TriggeredSendDataModel TriggerData, List<SubscriberDataModel> Subscriberlist)
@@ -294,8 +295,15 @@ namespace TriggeredSendWithTracking
         public static void TrackingEventData(Utlities.TrackingEvent eventType, DateTime sinceWhen, string TriggerSendObjectID)
         {
             string[] trackingData = RetrieveTrackingEvents(eventType, sinceWhen, TriggerSendObjectID);
-            var FilePath = string.Format(@"C:\{0}\{1}_{2}_EventData.csv", eventType.ToString(), eventType.ToString(), DateTime.Now.Ticks);
-            File.WriteAllLines(FilePath, trackingData);
+            var FilePath = string.Format(@"C:\{0}\", eventType.ToString());
+            var FileName = string.Format("{0}_{1}_{2}_EventData.csv", FilePath, eventType.ToString(), DateTime.Now.Ticks);
+
+            if (!Directory.Exists(FilePath))
+            {
+                Directory.CreateDirectory(FilePath);
+            }
+
+            File.WriteAllLines(FileName, trackingData);
         }
 
         public static string[] RetrieveTrackingEvents(Utlities.TrackingEvent eventType, DateTime sinceWhen, string TriggerSendObjectID)
